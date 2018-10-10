@@ -1,0 +1,328 @@
+---
+title: "Flow control and functions in R"
+author: "Yijia Zhao"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+###1.Section 4.1.1, exercises 2
+
+```{r}
+n <- 30
+f <- numeric(n)
+f[1:2] <- c(1,1)
+for (i in 3:n){
+  f[i] <-f[i-2] + f[i-1]
+}
+ratio <- numeric(n)
+ratio[1] <- 1
+ratio[2:n] <- f[2:n]/f[1:(n-1)]
+ratio
+(1+sqrt(5))/2
+ratio - (1+sqrt(5))/2
+```
+(a)According to the result, the sequence appears to converge.
+
+(b)According to the result, the sequence converges to golden ratio. Now let us prove it theoretically.
+
+Since $f_{n}=f_{n-2}+f_{n-1}$, we can derive that $f_{n}=\frac{1}{\sqrt{5}}[(\frac{1+\sqrt{5}}{2})^n-(\frac{1-\sqrt{5}}{2})^n]$. Therefore, $f_{n}/f_{n-1}=[(\frac{1+\sqrt{5}}{2})^n-(\frac{1-\sqrt{5}}{2})^n]/[(\frac{1+\sqrt{5}}{2})^{n-1}-(\frac{1-\sqrt{5}}{2})^{n-1}]=\frac{1+\sqrt{5}}{2}+\sqrt{5}/[(\frac{1+\sqrt{5}}{2})^{n-1}-(\frac{1-\sqrt{5}}{2})^{n-1}]\to \frac{1+\sqrt{5}}{2}$.
+
+###2.Section 4.1.1, exercises 3
+(a)15;(b)1,2,3,4,5;(c)0,1,2,3,4,5;(d)120;(e)3,21,23,6,11,15,$\cdots$
+```{r}
+answer <- 0
+for (j in 1:5) answer <- answer + j
+answer
+answer <- NULL
+for (j in 1:5) answer <- c(answer, j)
+answer
+answer <- 0
+for (j in 1:5) answer <- c(answer, j)
+answer
+answer <- 1
+for (j in 1:5) answer <- answer * j
+answer
+answer <- 3
+for (j in 1:15) answer <- c(answer, (7 * answer[j]) %% 31)
+answer
+```
+If I do not now the rule of the last sequence, I can still predict successive elements because answer[16]=answer[1], which means the following elements are replication of former ones.
+
+###3.Section 4.1.2, exercises 4
+```{r}
+GIC_interest <- function(initial_amount, years){
+ if (years <= 3){
+   return(initial_amount*((1+0.04)^years-1))
+ }else{
+   return(initial_amount*((1+0.05)^years-1))
+ }
+}
+```
+
+###4.Section 4.1.2, exercises 5
+```{r}
+mortgage_rate <- function(n, p, open){
+  if (open == TRUE){
+    i <- 0.005
+  } else{
+    i <- 0.004
+  }
+  R <- p*i/(1-(1+i)^(-n))
+  return(R)
+}
+```
+
+###5.Section 4.1.3, exercises 2
+```{r}
+Fibonacci <- c(1,1)
+while(Fibonacci[length(Fibonacci)]<300){
+  Fibonacci <- c(Fibonacci, Fibonacci[length(Fibonacci)] + Fibonacci[length(Fibonacci)-1])
+}
+print(Fibonacci[-length(Fibonacci)])
+```
+
+
+###6.Section 4.1.3, exercises 4
+```{r}
+fixed_point <- function(i){
+  diff <- 1.000000
+  times <- 0
+  while (diff >=  0.000001){
+    temp <- i
+    i <- (1-(1+i)^(-20))/19
+    diff <- abs(i-temp)
+    times <- times + 1
+  }
+  return(paste(times,i))
+}
+fixed_point(0.006)
+fixed_point(0.002)
+fixed_point(0.03)
+fixed_point(0.6)
+```
+When I try other starting guess, it still converges to the fixed point which is around 0.0049 in about 100 times of iterations.
+
+
+###7.Section 4.1.3, exercises 5
+It has been designed to calculate the number of iterations in the previous answer.
+
+###8.Section 4.1.5, exercise 2
+```{r}
+Eratosthenes <- function(n) {
+  # Print prime numbers up to n (based on the sieve of Eratosthenes)
+  if (n >= 2) {
+    sieve <- seq(2, n)
+    primes <- c()
+    while (length(sieve) > 0) {
+      p <- sieve[1]
+      primes <- c(primes, p)
+      sieve <- sieve[(sieve %% p) != 0]
+      }
+    return(primes)
+  }else{
+      stop("Input value of n should be at least 2.")
+  }
+}
+```
+
+(a)We can see that if the input number n is less than 2, the function will output the error information "Input value of n should be at least 2.". If the input number is no less than 2, the vector primes will record every number which can not be exactly divided by any number from 2 to itself-1. That is to say, the function will output all prime numbers no more than the input number n.
+
+To verify this result, we can do some calculations with this function.
+```{r}
+Eratosthenes(49)
+```
+We can see that the function outputs all prime numbers no more than 41. 
+
+(b)If a number k is not a prime number, it must can be exactly divided by a number which is no more than its square root $\sqrt{k}\leq \sqrt{n}$. So when $p>=\sqrt{n}$, all remaining numbers in sieve can not be exactly divided by numbers no more than its square root. So they must be prime numbers.
+
+(c)In view of the result of (b), we can modify our function as follows.
+```{r}
+Eratosthenes <- function(n) {
+  # Print prime numbers up to n (based on the sieve of Eratosthenes)
+  if (n >= 2) {
+    sieve <- seq(2, n)
+    primes <- c()
+    while (length(sieve) > 0) {
+      p <- sieve[1]
+      primes <- c(primes, p)
+      sieve <- sieve[(sieve %% p) != 0]
+      if (p >= sqrt(n)){
+        break()
+      }
+      }
+    return(c(primes,sieve))
+  }else{
+      stop("Input value of n should be at least 2.")
+  }
+}
+Eratosthenes(49)
+```
+
+
+###9.Section 4.2.1, exercises 2
+(a)
+```{r}
+compound.interst <- function(primary, interestrate, periods){
+  return(primary*((1+interestrate)^periods))
+}
+```
+
+(b)
+```{r}
+compound.interst(1000,0.01,30)
+```
+
+He will have $1347.849 in the bank at the end of 30 months.
+
+###10.Section 4.2.1, exercises 3
+Here we ask users to input the function f and the interval $[a,b]$ to find the zero(requiring only one zero existing in the interval) and output the point whose absolute function value is no more than 0.000 001.
+```{r}
+find.zero <- function(f, a, b){
+  x <- c(a,b)
+  y <- c(f(a),f(b))
+  diff <- min(abs(y))
+  if (y[1]*y[2] <= 0){
+     while (diff > 0.000001){
+       xnew <- mean(x)
+       id <- (y*f(xnew)>0)
+       x[id] <- xnew
+       y[id] <- f(xnew)
+       diff <- min(abs(y))
+  }
+    zero <- x[abs(y)<= 0.000001]
+    return(zero)
+  }else{
+    return("There is no single zero in this interval.")
+  }
+}
+```
+Give an example of calculation.
+```{r}
+f1 <- function(x){
+  return(sin(x))
+}
+find.zero(f1,3,4)
+find.zero(f1,0.5,1)
+```
+
+###11.Section 4.4.1, exercises 1
+```{r}
+mergesort <- function (x, decreasing = FALSE) {
+  # Check for a vector that doesn¡¯t need sorting
+  len <-length(x)
+  if (len < 2) result <- x
+  else {
+    # 2: sort x into result
+    # 2.1: split x in half
+    y <- x[1:(len %/% 2)]
+    z <- x[(len %/% 2 + 1):len]
+    # 2.2: sort y and z
+    y <- mergesort(y)
+    z <- mergesort(z)
+    # 2.3: merge y and z into a sorted result
+    result <- c()
+    # 2.3.1: while (some are left in both piles)
+    while (min(length(y), length(z)) > 0) {
+      # 2.3.2: put the smallest first element on the end
+      # 2.3.3: remove it from y or z
+      if (y[1] < z[1]) {
+        result <- c(result, y[1])
+        y <- y[-1]
+        } else {
+          result <- c(result, z[1])
+          z <- z[-1]
+        }
+      }
+    # 2.3.4: put the leftovers onto the end of result
+    if (length(y) > 0)
+      result <- c(result, y)
+    else
+      result <- c(result, z)
+  }
+  if (decreasing == TRUE){
+    result <- result[length(result):1]
+  }
+  return(result)
+}
+a <- c(5,3,7,0,1,6,4)
+mergesort(a, TRUE)
+mergesort(a, FALSE)
+```
+###12.Section 4.4.1, exercises 2
+(a)
+```{r}
+Newton.method <- function(f,g,x0,y0,dist){
+  partial.fx <- D(f,'x')
+  partial.fy <- D(f,'y')
+  partial.gx <- D(g,'x')
+  partial.gy <- D(g,'y')
+  x <- x0
+  y <- y0
+  while (abs(eval(f))>dist||abs(eval(g))>dist){
+    d <- eval(partial.fx)*eval(partial.gy)-eval(partial.fy)*eval(partial.gx)
+    xnew <- x - (eval(partial.gy)*eval(f)-eval(partial.fy)*eval(g))/d
+    ynew <- y - (eval(partial.fx)*eval(g)-eval(partial.gx)*eval(f))/d
+    x <- xnew
+    y <- ynew
+  }
+  return(c(x,y))
+}
+```
+
+(b)
+Because Newton method can be fixed around one solution, we can find two solutions with different initial guesses.
+```{r}
+ans1 <- Newton.method(expression(x+y),expression(x^2+2*y^2-2),-1,1,0.000001)
+ans2 <- Newton.method(expression(x+y),expression(x^2+2*y^2-2),1,-1,0.000001)
+```
+
+So the two solutions of this system are $(x,y)=($`r ans1`$)$ and $(x,y)=($ `r ans2`$)$.
+
+###13.Chapter 4 exercises 1
+```{r}
+directpoly <- function (x, poly.coef){
+  ans <- 0
+  for (i in 1:length(poly.coef) ){
+    ans <- ans + poly.coef[i]*(x^(i-1))
+  }
+  return(ans)
+}
+```
+
+###14.Chapter 4 exercises 2
+```{r}
+hornerpoly <- function (x, poly.coef){
+  a <- poly.coef[length(poly.coef)]
+  for (i in (length(poly.coef)-1):1 ){
+    a <- a*x + poly.coef[i]
+  }
+  return(a)
+}
+```
+Test the function with examples.
+```{r}
+hornerpoly(2,c(3,2,1))
+hornerpoly(c(1,2,3),c(3,2,1))
+```
+The answers are correct.
+
+###15.Chapter 4 exercises 3
+(a)
+```{r}
+system.time(directpoly(x=seq(-10, 10, length=5000000), c(1, -2, 2, 3, 4, 6, 7)))
+system.time(hornerpoly(x=seq(-10, 10, length=5000000), c(1, -2, 2, 3, 4, 6, 7)))
+```
+According to the results, hornerpoly is far more efficient than directpoly in this case.
+
+(b)
+```{r}
+system.time(directpoly(x=seq(-10, 10, length=5000000), c(-3,17,2)))
+system.time(hornerpoly(x=seq(-10, 10, length=5000000), c(-3,17,2)))
+```
+
+When the number of polynomial coefficients is smaller, hornerpoly is still more efficient than directpoly. But the difference is not so distinct.
+
+
